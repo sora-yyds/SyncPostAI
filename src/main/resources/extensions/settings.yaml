@@ -1,0 +1,72 @@
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: starter-settings
+spec:
+  forms:
+    - group: security
+      label: 推送安全
+      formSchema:
+        - $formkit: switch
+          name: enabled
+          label: 启用外部推送
+          value: true
+          help: 关闭后，插件会拒绝所有外部文章推送请求。
+        - $formkit: password
+          name: pushToken
+          label: 推送 Token
+          value: ""
+          validation: required
+          help: 外部调用方必须在 X-SyncPost-Token 请求头中携带这个值。
+    - group: publishing
+      label: 发布默认值
+      formSchema:
+        - $formkit: switch
+          name: defaultPublish
+          label: 默认直接发布
+          value: true
+          help: 当请求体没有传入 publish 字段时，使用这里的默认发布状态。
+        - $formkit: text
+          name: defaultOwner
+          label: 默认作者
+          value: admin
+          validation: required
+          help: 当请求体和 Markdown Front Matter 都没有传入 author/auther 时使用。
+        - $formkit: list
+          name: defaultCategories
+          label: 默认分类
+          value: []
+          itemType: string
+          addLabel: 添加分类
+          help: 当请求体和 Markdown Front Matter 都没有传入 categories 时使用。
+          children:
+            - $formkit: text
+              index: "$index"
+              validation: required
+        - $formkit: list
+          name: defaultTags
+          label: 默认标签
+          value: []
+          itemType: string
+          addLabel: 添加标签
+          help: 当请求体和 Markdown Front Matter 都没有传入 tags 时使用。
+          children:
+            - $formkit: text
+              index: "$index"
+              validation: required
+        - $formkit: switch
+          name: randomCoverEnabled
+          label: 启用随机封面图集
+          value: false
+          help: 当请求体和 Markdown Front Matter 的 cover 都为空时，从下方图集中随机选择一张作为文章封面。
+        - $formkit: list
+          name: coverImages
+          label: 封面图集
+          value: []
+          itemType: string
+          addLabel: 添加封面图
+          help: 每一项填写一个可访问的图片 URL。仅在启用随机封面图集且文章未指定封面时使用。
+          children:
+            - $formkit: text
+              index: "$index"
+              validation: required|url

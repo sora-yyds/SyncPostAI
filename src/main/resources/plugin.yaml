@@ -1,0 +1,24 @@
+# Refer https://docs.halo.run/developer-guide/plugin/basics/manifest
+
+apiVersion: plugin.halo.run/v1alpha1
+kind: Plugin
+metadata:
+  # Keep this name stable because it is used by the plugin identity and API group.
+  name: SyncPostAI
+spec:
+  enabled: true
+  requires: ">=2.23.0"
+  author:
+    name: "--sora--"
+    website: https://s-o-r-a.top/
+  logo: logo.png
+  settingName: starter-settings
+  configMapName: starter-configmap
+  homepage: https://github.com/sora-yyds/SyncPostAI#readme
+  repo: https://github.com/sora-yyds/SyncPostAI/
+  issues: https://github.com/sora-yyds/SyncPostAI/issues
+  displayName: "同步文章 AI 发布"
+  description: "接收外部 AI 或第三方系统推送的文章内容，并通过安全 Token 校验后自动发布到 Halo。"
+  license:
+    - name: "GPL-3.0"
+      url: "https://github.com/sora-yyds/SyncPostAI/blob/main/LICENSE"
