@@ -13,10 +13,10 @@ export default definePlugin({
         name: 'SyncPostAI',
         component: HomeView,
         meta: {
-          title: '同步文章 AI 发布',
+          title: '智稿同步（SyncPostAI）',
           searchable: true,
           menu: {
-            name: '同步文章 AI 发布',
+            name: '智稿同步',
             group: 'tool',
             icon: markRaw(RiRobot2Line),
             priority: 0,

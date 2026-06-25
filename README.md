@@ -1,67 +1,82 @@
-# SyncPostAI
+# 智稿同步（SyncPostAI）
 
-同步文章 AI 发布是一个 Halo 2.x 插件，用于接收外部 AI、自动化脚本或其他系统推送的文章内容，并通过安全 Token 校验后自动发布到 Halo。
+智稿同步（SyncPostAI）是一个 Halo 2.x 插件，用于接收外部 AI、自动化脚本或第三方系统推送的文章，并自动发布到 Halo。
 
-典型场景：
+适用场景：
 
-- AI 写作工具生成文章后，直接推送到 Halo。
-- 第三方内容系统将文章同步到 Halo。
-- 本地 Markdown 文件通过脚本发布到 Halo。
-- 其他 Halo 插件或外部服务调用本插件接口创建文章。
+- AI 写作工具生成文章后，直接发布到 Halo。
+- 自动化脚本定时把 Markdown 文件发布到博客。
+- 第三方内容系统把文章同步到 Halo。
+- 其他 Halo 插件通过 HTTP 接口创建文章。
 
-## 功能
+## 功能特性
 
-- 提供外部文章推送 API。
-- 支持 Token 鉴权，请求头为 `X-SyncPost-Token`。
-- 支持 `text`、`html`、`markdown` 三种内容类型。
-- Markdown 会自动转换为 HTML 后发布。
+- 通过公开接口推送文章。
+- 使用 `X-SyncPost-Token` 请求头进行 Token 鉴权。
+- 支持 `markdown`、`html`、`text` 三种内容类型。
+- Markdown 自动转换为 HTML。
 - 支持读取 Markdown 顶部的 Front Matter。
-- `title` 可选；优先读取请求字段，其次读取 Front Matter，最后读取第一个一级标题 `# 标题`。
-- 标题有兜底策略；即使没有传标题、Front Matter 和一级标题，也会生成安全标题，避免发布流程崩溃。
-- `excerpt` 可选；优先读取请求字段，其次读取 Front Matter，不传时使用 Halo 自动摘要。
-- 支持文章封面 `cover`；当封面为空且启用随机封面图集时，会从图集中随机选择一张。
-- 自动创建请求中传入的分类和标签。
-- 支持默认作者、默认分类、默认标签、默认发布状态等插件设置。
-- 发布成功后响应中返回文章完整访问地址 `articleUrl`，方便请求方继续处理。
+- 支持从 Front Matter 读取标题、作者、封面、摘要、分类和标签。
+- 未传标题时自动兜底：Front Matter 标题、正文一级标题、正文片段、`未命名文章`。
+- 支持随机封面图集。
+- 发布成功后返回文章完整访问地址 `articleUrl`。
 
-## 安装与配置
+## 安装
 
-1. 执行构建：
+1. 下载或构建插件 jar。
+2. 进入 Halo 后台。
+3. 打开「插件」页面。
+4. 上传并启用智稿同步插件。
+5. 进入插件设置，完成推送配置。
+
+本地构建命令：
 
 ```powershell
 .\gradlew.bat build
 ```
 
-2. 将生成的插件 jar 安装到 Halo：
+构建后的 jar 位于：
 
 ```text
 build/libs/
 ```
 
-3. 在 Halo 控制台启用插件。
+## 插件设置
 
-4. 进入插件设置，配置：
+| 配置项 | 说明 |
+| --- | --- |
+| 启用外部推送 | 关闭后，所有外部推送请求都会被拒绝。 |
+| 推送 Token | 外部系统调用接口时必须携带的密钥。 |
+| 默认作者 | 请求和 Front Matter 都未指定作者时使用。 |
+| 默认分类 | 请求和 Front Matter 都未指定分类时使用。 |
+| 默认标签 | 请求和 Front Matter 都未指定标签时使用。 |
+| 默认直接发布 | 请求未传 `publish` 时使用。 |
+| 启用随机封面图集 | 当文章未指定封面时，从封面图集中随机选择封面。 |
+| 封面图集 | 每一项填写一个可访问的图片 URL。 |
 
-- 启用外部推送
-- 推送 Token
-- 默认作者
-- 默认分类
-- 默认标签
-- 默认直接发布
-- 随机封面图集
+请妥善保管推送 Token，不要公开到网页、仓库或客户端代码中。
 
-`推送 Token` 是外部系统调用接口时必须携带的密钥，请不要公开。
+## 数据与隐私
+
+智稿同步会根据你的配置处理以下数据：
+
+- 接收外部请求中的文章标题、正文、摘要、作者、封面、分类、标签和发布状态。
+- 将文章、分类和标签写入当前 Halo 站点。
+- 在插件设置中保存推送 Token、默认作者、默认分类、默认标签和封面图集配置。
+- 发布成功后向请求方返回文章资源名、快照名、发布状态和文章访问地址。
+
+插件不会主动向第三方服务发送站点内容、用户数据、访问日志或推送 Token，也不包含遥测、统计、广告或远程配置功能。封面图集中的图片 URL 由站点管理员自行配置，文章页面访问这些图片时可能会由浏览器请求对应的图片服务。
 
 ## 接口地址
 
 ```http
-POST /apis/api.starter.halo.run/v1alpha1/articles
+POST /apis/api.syncpostai.sora.run/v1alpha1/articles
 ```
 
-完整示例：
+完整地址示例：
 
 ```text
-https://你的站点域名/apis/api.starter.halo.run/v1alpha1/articles
+https://你的站点域名/apis/api.syncpostai.sora.run/v1alpha1/articles
 ```
 
 请求头：
@@ -75,18 +90,18 @@ X-SyncPost-Token: 你的推送 Token
 
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
-| `title` | string | 否 | 文章标题。Markdown 模式下不传时，会读取第一个 `# 一级标题`。 |
-| `content` | string | 是 | 文章正文内容。 |
-| `contentType` | string | 否 | 内容类型：`markdown`、`html`、`text`。默认是 `text`。 |
-| `excerpt` | string | 否 | 自定义摘要。不传时使用 Halo 自动摘要。 |
-| `author` | string | 否 | 文章作者用户名。优先级高于 Front Matter 中的 `author` / `auther`。 |
-| `cover` | string | 否 | 文章封面图 URL。为空时可由随机封面图集兜底。 |
-| `slug` | string | 否 | 文章别名。建议外部系统传入稳定且唯一的值。 |
-| `tags` | string[] | 否 | 标签显示名称。不存在时插件会自动创建。 |
-| `categories` | string[] | 否 | 分类显示名称。不存在时插件会自动创建。 |
-| `publish` | boolean | 否 | 是否直接发布。不传时使用插件设置中的默认发布状态。 |
+| `content` | string | 是 | 文章正文。 |
+| `contentType` | string | 否 | `markdown`、`html` 或 `text`，默认 `text`。 |
+| `title` | string | 否 | 文章标题。优先级高于 Front Matter。 |
+| `author` | string | 否 | Halo 用户名。优先级高于 Front Matter 中的 `author` / `auther`。 |
+| `cover` | string | 否 | 文章封面图 URL。 |
+| `excerpt` | string | 否 | 文章摘要。不传时使用 Halo 自动摘要。 |
+| `slug` | string | 否 | 文章别名。建议传入稳定且唯一的值。 |
+| `categories` | string[] | 否 | 分类名称列表。不存在时插件会自动创建。 |
+| `tags` | string[] | 否 | 标签名称列表。不存在时插件会自动创建。 |
+| `publish` | boolean | 否 | 是否直接发布。不传时使用插件设置。 |
 
-请求字段优先级高于 Markdown Front Matter。也就是说，如果请求体里传了 `title`，即使 Markdown 顶部也写了 `title`，最终仍然使用请求体里的 `title`。
+请求体字段优先级高于 Markdown Front Matter。
 
 ## Markdown Front Matter
 
@@ -95,7 +110,7 @@ X-SyncPost-Token: 你的推送 Token
 ```markdown
 ---
 title: 从企业记忆到世界模型：AI Agent 正进入“长期上下文”竞争
-auther: admin
+author: admin
 cover:
 excerpt: 今日 AI 动态显示，产业竞争正从单点模型能力转向长期上下文、组织知识、世界模拟与数据质量。
 categories:
@@ -111,63 +126,57 @@ tags:
 这里开始写正文。
 ```
 
-支持字段：
+兼容字段：
 
-| Front Matter 字段 | 说明 |
-| --- | --- |
-| `title` | 文章标题。 |
-| `author` / `auther` | 文章作者用户名。`auther` 是兼容字段，建议后续使用 `author`。 |
-| `cover` | 文章封面图 URL。为空时可使用随机封面图集兜底。 |
-| `excerpt` | 文章摘要。 |
-| `categories` | 文章分类列表。 |
-| `tags` | 文章标签列表。 |
+- `author`：推荐使用。
+- `auther`：兼容旧写法。
 
 标题解析顺序：
 
-1. 请求体里的 `title`
-2. Front Matter 里的 `title`
-3. Markdown 正文里的第一个 `# 一级标题`
+1. 请求体 `title`
+2. Front Matter `title`
+3. Markdown 正文第一个 `# 一级标题`
 4. 正文前 30 个字符
 5. `未命名文章`
 
 封面解析顺序：
 
-1. 请求体里的 `cover`
-2. Front Matter 里的 `cover`
+1. 请求体 `cover`
+2. Front Matter `cover`
 3. 插件设置中的随机封面图集
 4. 空封面
 
-## Markdown 推送示例
+## 调用示例
 
-`title` 可以省略，插件会读取 Markdown 中第一个一级标题：
+<details open>
+<summary>REST JSON 示例</summary>
 
 ```json
 {
-  "content": "---\ntitle: Markdown 自动发布测试文章\nauther: admin\ncover:\nexcerpt: 这是一段来自 Markdown Front Matter 的摘要。\ncategories:\n  - 默认分类\ntags:\n  - AI\n  - Markdown\n  - 测试\n---\n\n这是一篇由外部 AI 系统推送到 SyncPostAI 插件的测试文章。\n\n## 二级标题\n\n这里包含 **加粗文字** 和普通段落。",
+  "content": "---\ntitle: AI 生成文章示例\nauthor: admin\ncover:\nexcerpt: 这是一段摘要。\ncategories:\n  - AI推送\ntags:\n  - AI Agent\n  - 大模型\n---\n\n这是一篇由外部 AI 系统推送到 Halo 的 Markdown 文章。\n\n## 二级标题\n\n这里包含 **加粗文字** 和普通段落。",
   "contentType": "markdown",
-  "slug": "markdown-auto-post",
+  "slug": "ai-generated-post",
   "publish": true
 }
 ```
 
-成功响应示例：
+成功响应：
 
 ```json
 {
   "success": true,
   "message": "Article published to Halo.",
-  "articleName": "markdown-auto-post",
-  "snapshotName": "markdown-auto-post-base-xxxx",
+  "articleName": "ai-generated-post",
+  "snapshotName": "ai-generated-post-base-xxxx",
   "status": "published",
-  "articleUrl": "https://你的站点域名/archives/markdown-auto-post"
+  "articleUrl": "https://你的站点域名/archives/ai-generated-post"
 }
 ```
 
-请求方会收到这段 JSON 响应，可以直接读取 `articleUrl` 获取发布后的文章地址。
+</details>
 
-## PowerShell 调用示例
-
-发送一篇 Markdown 文章：
+<details>
+<summary>PowerShell 示例</summary>
 
 ```powershell
 $siteUrl = "https://你的站点域名"
@@ -176,32 +185,33 @@ $jsonPath = "$env:TEMP\syncpostai-test.json"
 
 $json = @'
 {
-  "content": "# Markdown 自动发布测试文章\n\n这是一段 **加粗文字**。\n\n## 二级标题\n\n- 列表 1\n- 列表 2",
+  "content": "# AI 生成文章示例\n\n这是一段 **Markdown** 正文。",
   "contentType": "markdown",
-  "slug": "markdown-simple-test",
-  "tags": ["AI", "Markdown", "测试"],
-  "categories": ["默认分类"],
+  "slug": "ai-generated-post",
+  "tags": ["AI", "Markdown"],
+  "categories": ["AI推送"],
   "publish": true
 }
 '@
 
 [System.IO.File]::WriteAllText($jsonPath, $json, [System.Text.UTF8Encoding]::new($false))
 
-curl.exe -X POST "$siteUrl/apis/api.starter.halo.run/v1alpha1/articles" `
+curl.exe -X POST "$siteUrl/apis/api.syncpostai.sora.run/v1alpha1/articles" `
   -H "Content-Type: application/json; charset=utf-8" `
   -H "X-SyncPost-Token: $token" `
   --data-binary "@$jsonPath"
 ```
 
-## 推送本地 Markdown 文件
+</details>
 
-Windows PowerShell 5.1 对中文和大段 Markdown 转 JSON 容易出问题，推荐先把 JSON 写入临时文件，再用 `curl.exe --data-binary` 发送。
+<details>
+<summary>推送本地 Markdown 文件</summary>
 
 ```powershell
 $siteUrl = "https://你的站点域名"
 $token = "你的推送 Token"
-$mdPath = "E:\Users\--sora--\Desktop\test.md"
-$jsonPath = "$env:TEMP\syncpostai-markdown-file-test.json"
+$mdPath = "D:\Articles\demo.md"
+$jsonPath = "$env:TEMP\syncpostai-markdown-file.json"
 
 $content = Get-Content -Raw -Encoding UTF8 $mdPath
 
@@ -215,106 +225,68 @@ $json = @"
   "content": $escapedContent,
   "contentType": "markdown",
   "slug": "markdown-file-test-$(Get-Date -Format 'yyyyMMddHHmmss')",
-  "tags": ["AI", "Markdown", "测试"],
-  "categories": ["默认分类"],
   "publish": true
 }
 "@
 
 [System.IO.File]::WriteAllText($jsonPath, $json, [System.Text.UTF8Encoding]::new($false))
 
-Get-Content -Raw -Encoding UTF8 $jsonPath | ConvertFrom-Json
-
-curl.exe -X POST "$siteUrl/apis/api.starter.halo.run/v1alpha1/articles" `
+curl.exe -X POST "$siteUrl/apis/api.syncpostai.sora.run/v1alpha1/articles" `
   -H "Content-Type: application/json; charset=utf-8" `
   -H "X-SyncPost-Token: $token" `
   --data-binary "@$jsonPath"
 ```
 
-说明：
+插件当前不是上传 `.md` 文件对象，而是读取 Markdown 文件内容后放入 JSON 的 `content` 字段。
 
-- `.md` 文件不是以文件对象上传，而是读取文件内容后放入 JSON 的 `content` 字段。
-- 如果 Markdown 文件内有 `# 一级标题`，并且请求中没有传 `title`，插件会使用这个一级标题作为文章标题。
-- 如果没有传 `excerpt`，Halo 会自动生成摘要。
+</details>
 
-## 其他插件或 AI 系统如何调用
-
-其他系统只需要向本插件接口发送一个 HTTP POST 请求。
-
-调用步骤：
-
-1. 在 Halo 插件设置中启用外部推送。
-2. 设置一个足够安全的推送 Token。
-3. 外部系统生成文章内容。
-4. 将文章内容组装成 JSON。
-5. 请求头中加入 `X-SyncPost-Token`。
-6. POST 到 `/apis/api.starter.halo.run/v1alpha1/articles`。
-
-### 通用 HTTP 请求
-
-```http
-POST https://你的站点域名/apis/api.starter.halo.run/v1alpha1/articles
-Content-Type: application/json; charset=utf-8
-X-SyncPost-Token: 你的推送 Token
-
-{
-  "content": "# AI 生成的文章标题\n\n这里是 AI 生成的正文。",
-  "contentType": "markdown",
-  "slug": "ai-generated-post-20260624",
-  "tags": ["AI"],
-  "categories": ["默认分类"],
-  "publish": true
-}
-```
-
-### JavaScript / Node.js 示例
+<details>
+<summary>Node.js 示例</summary>
 
 ```js
 const siteUrl = 'https://你的站点域名'
 const token = '你的推送 Token'
 
-const response = await fetch(`${siteUrl}/apis/api.starter.halo.run/v1alpha1/articles`, {
+const response = await fetch(`${siteUrl}/apis/api.syncpostai.sora.run/v1alpha1/articles`, {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json; charset=utf-8',
     'X-SyncPost-Token': token,
   },
   body: JSON.stringify({
-    content: '# AI 生成的文章标题\n\n这里是 AI 生成的正文，支持 **Markdown**。',
+    content: '# AI 生成文章示例\n\n这里是正文，支持 **Markdown**。',
     contentType: 'markdown',
-    excerpt: '这是一段可选摘要。',
     slug: `ai-post-${Date.now()}`,
-    tags: ['AI'],
-    categories: ['默认分类'],
     publish: true,
   }),
 })
 
 const result = await response.json()
-console.log(result)
+console.log(result.articleUrl)
 ```
 
-### Python 示例
+</details>
+
+<details>
+<summary>Python 示例</summary>
 
 ```python
-import requests
 import time
+import requests
 
 site_url = "https://你的站点域名"
 token = "你的推送 Token"
 
 payload = {
-    "content": "# AI 生成的文章标题\n\n这里是 AI 生成的正文，支持 **Markdown**。",
+    "content": "# AI 生成文章示例\n\n这里是正文，支持 **Markdown**。",
     "contentType": "markdown",
-    "excerpt": "这是一段可选摘要。",
     "slug": f"ai-post-{int(time.time())}",
-    "tags": ["AI"],
-    "categories": ["默认分类"],
     "publish": True,
 }
 
 response = requests.post(
-    f"{site_url}/apis/api.starter.halo.run/v1alpha1/articles",
+    f"{site_url}/apis/api.syncpostai.sora.run/v1alpha1/articles",
     headers={
         "Content-Type": "application/json; charset=utf-8",
         "X-SyncPost-Token": token,
@@ -323,9 +295,10 @@ response = requests.post(
     timeout=30,
 )
 
-print(response.status_code)
 print(response.json())
 ```
+
+</details>
 
 ## 常见问题
 
@@ -334,13 +307,14 @@ print(response.json())
 请确认接口路径是：
 
 ```text
-/apis/api.starter.halo.run/v1alpha1/articles
+/apis/api.syncpostai.sora.run/v1alpha1/articles
 ```
 
 不要使用旧路径：
 
 ```text
-/apis/api.starter.halo.run/v1alpha1/ai/articles
+/apis/api.syncpostai.sora.run/v1alpha1/ai/articles
+/apis/api.starter.halo.run/v1alpha1/articles
 ```
 
 ### 为什么返回 `Failed to read HTTP message`？
@@ -353,47 +327,22 @@ print(response.json())
 
 ### 为什么提示文章已存在？
 
-插件会使用 `slug` 生成文章资源名。相同 `slug` 重复推送时会返回已存在。测试时建议在 `slug` 后加时间戳。
+插件会使用 `slug` 生成文章资源名。相同 `slug` 重复推送会返回已存在。测试时建议在 `slug` 后加时间戳。
 
-### Markdown 是否支持标题、加粗和列表？
+### 为什么没有封面？
 
-支持。请求中设置：
+请按顺序检查：
 
-```json
-{
-  "contentType": "markdown"
-}
-```
+1. 请求体是否传了 `cover`。
+2. Markdown Front Matter 是否填写了 `cover`。
+3. 插件设置中是否启用了随机封面图集。
+4. 封面图集里的 URL 是否可以公网访问。
 
-插件会将 Markdown 转换为 HTML 后发布。
+## 相关链接
 
-## 开发
-
-环境要求：
-
-- JDK 21
-- Node 20
-- pnpm 9
-- Docker，可选，用于本地 Halo 调试
-
-构建：
-
-```powershell
-.\gradlew.bat build
-```
-
-仅编译 Java：
-
-```powershell
-.\gradlew.bat compileJava
-```
-
-本地 Halo 调试：
-
-```powershell
-.\gradlew.bat haloServer
-```
+- 仓库地址：<https://github.com/sora-yyds/SyncPostAI/>
+- 问题反馈：<https://github.com/sora-yyds/SyncPostAI/issues>
 
 ## 许可证
 
-GPL-3.0
+本项目使用 GPL-3.0 开源协议。

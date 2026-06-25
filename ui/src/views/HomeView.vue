@@ -6,13 +6,14 @@ import RiFileCopyLine from '~icons/ri/file-copy-line'
 import RiShieldKeyholeLine from '~icons/ri/shield-keyhole-line'
 import RiUploadCloud2Line from '~icons/ri/upload-cloud-2-line'
 
-const endpointPath = '/apis/api.starter.halo.run/v1alpha1/articles'
+const endpointPath = '/apis/api.syncpostai.sora.run/v1alpha1/articles'
 const tokenHeader = 'X-SyncPost-Token'
 
 const samplePayload = {
-  content: '---\ntitle: Markdown 自动发布测试文章\nauther: admin\ncover:\nexcerpt: 这是一段来自 Markdown Front Matter 的摘要。\ncategories:\n  - 默认分类\ntags:\n  - AI\n  - 测试\n---\n\n这是一篇由外部 AI 系统推送到 SyncPostAI 插件的测试文章。\n\n## 二级标题\n\n这里包含 **加粗文字** 和普通段落。',
+  content:
+    '---\ntitle: AI 生成文章示例\nauthor: admin\ncover:\nexcerpt: 这是一段来自 Markdown Front Matter 的摘要。\ncategories:\n  - AI推送\ntags:\n  - AI Agent\n  - 大模型\n---\n\n这是一篇由外部 AI 系统推送到 Halo 的 Markdown 文章。\n\n## 二级标题\n\n这里包含 **加粗文字**、列表和普通段落。',
   contentType: 'markdown',
-  slug: 'ai-test-post',
+  slug: 'ai-generated-post',
   publish: true,
 }
 
@@ -49,7 +50,7 @@ async function copyText(key: string, value: string) {
     <header class="syncpost__header">
       <div>
         <p class="syncpost__eyebrow">外部文章推送</p>
-        <h1>同步文章 AI 发布</h1>
+        <h1>智稿同步（SyncPostAI）</h1>
       </div>
       <div class="syncpost__status">
         <RiCheckboxCircleLine />
@@ -91,15 +92,14 @@ async function copyText(key: string, value: string) {
       <article class="panel">
         <div class="panel__title">
           <RiShieldKeyholeLine />
-          必要配置
+          使用前检查
         </div>
         <ul class="checklist">
           <li>已在插件设置中启用外部推送</li>
           <li>已填写推送 Token</li>
           <li>默认作者是已存在的 Halo 用户名</li>
           <li>Markdown Front Matter 可填写标题、作者、封面、摘要、分类和标签</li>
-          <li>未传 title 时，插件会读取 Front Matter 标题或第一个一级标题</li>
-          <li>excerpt 为可选字段，不传时使用 Halo 自动摘要</li>
+          <li>未传标题时，插件会自动读取 Front Matter 标题或正文一级标题</li>
           <li>启用随机封面图集后，空封面会自动从图集中选择</li>
         </ul>
       </article>

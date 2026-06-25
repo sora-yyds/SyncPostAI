@@ -4,7 +4,7 @@ plugins {
     id "run.halo.plugin.devtools" version "0.6.2"
 }
 
-group 'run.halo.starter'
+group 'top.sora.syncpostai'
 
 repositories {
     maven {
@@ -60,5 +60,5 @@ tasks.named('generatePluginComponentsIdx') {
 }
 
 halo {
-    version = '2.23.0-beta.2'
+    version = '2.23.1'
 }

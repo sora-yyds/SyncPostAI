@@ -33,7 +33,7 @@ public class AiArticleEndpoint implements CustomEndpoint {
 
     @Override
     public GroupVersion groupVersion() {
-        return new GroupVersion("api.starter.halo.run", "v1alpha1");
+        return new GroupVersion("api.syncpostai.sora.run", "v1alpha1");
     }
 
     private Mono<ServerResponse> pushArticle(ServerRequest request) {

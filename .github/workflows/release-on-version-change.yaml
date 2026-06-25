@@ -1,0 +1,123 @@
+name: Release on version change
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - gradle.properties
+      - CHANGELOG.md
+      - README.md
+      - build.gradle
+      - settings.gradle
+      - src/**
+      - ui/**
+      - .github/workflows/release-on-version-change.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          VERSION="$(grep '^version=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')"
+          if [[ -z "$VERSION" ]]; then
+            echo "gradle.properties 中没有找到 version 字段。"
+            exit 1
+          fi
+          if [[ "$VERSION" == *SNAPSHOT* ]]; then
+            echo "Release 版本不能包含 SNAPSHOT：$VERSION"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check version changed
+        id: changed
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          PREVIOUS_VERSION="$(git show HEAD^:gradle.properties 2>/dev/null | grep '^version=' | cut -d'=' -f2 | tr -d '[:space:]' || true)"
+          CURRENT_VERSION="${{ steps.version.outputs.version }}"
+          if [[ "$PREVIOUS_VERSION" == "$CURRENT_VERSION" ]]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "version 未变化，跳过 Release。"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check tag
+        if: github.event_name == 'workflow_dispatch' || steps.changed.outputs.changed == 'true'
+        shell: bash
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "标签已存在：$TAG"
+            exit 1
+          fi
+
+      - name: Set up JDK
+        if: github.event_name == 'workflow_dispatch' || steps.changed.outputs.changed == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up pnpm
+        if: github.event_name == 'workflow_dispatch' || steps.changed.outputs.changed == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        if: github.event_name == 'workflow_dispatch' || steps.changed.outputs.changed == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: ui/pnpm-lock.yaml
+
+      - name: Build plugin
+        if: github.event_name == 'workflow_dispatch' || steps.changed.outputs.changed == 'true'
+        shell: bash
+        run: ./gradlew build
+
+      - name: Create release notes
+        if: github.event_name == 'workflow_dispatch' || steps.changed.outputs.changed == 'true'
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          {
+            echo "智稿同步（SyncPostAI） $VERSION"
+            echo
+            echo "构建产物见 Assets 中的插件 JAR 文件。"
+            echo
+            echo "详细变更请查看 CHANGELOG.md。"
+          } > release-notes.md
+
+      - name: Create GitHub Release
+        if: github.event_name == 'workflow_dispatch' || steps.changed.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "$TAG"
+          git push origin "$TAG"
+          gh release create "$TAG" build/libs/*.jar \
+            --title "智稿同步（SyncPostAI） ${{ steps.version.outputs.version }}" \
+            --notes-file release-notes.md

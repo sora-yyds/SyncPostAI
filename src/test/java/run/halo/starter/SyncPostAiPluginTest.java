@@ -8,13 +8,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import run.halo.app.plugin.PluginContext;
 
 @ExtendWith(MockitoExtension.class)
-class StarterPluginTest {
+class SyncPostAiPluginTest {
 
     @Mock
     PluginContext context;
 
     @InjectMocks
-    StarterPlugin plugin;
+    SyncPostAiPlugin plugin;
 
     @Test
     void contextLoads() {
