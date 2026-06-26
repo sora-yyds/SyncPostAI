@@ -4,20 +4,6 @@ metadata:
   name: syncpostai-settings
 spec:
   forms:
-    - group: security
-      label: 推送安全
-      formSchema:
-        - $formkit: switch
-          name: enabled
-          label: 启用外部推送
-          value: true
-          help: 关闭后，插件会拒绝所有外部文章推送请求。
-        - $formkit: password
-          name: pushToken
-          label: 推送 Token
-          value: ""
-          validation: required
-          help: 外部调用方必须在 X-SyncPost-Token 请求头中携带这个值。
     - group: publishing
       label: 发布默认值
       formSchema:
@@ -25,13 +11,32 @@ spec:
           name: defaultPublish
           label: 默认直接发布
           value: true
-          help: 当请求体没有传入 publish 字段时，使用这里的默认发布状态。
-        - $formkit: text
+          help: "关闭后，所有来源都会进入审核队列，即使请求体传入 `publish: true` 也不会直接发布。"
+        - $formkit: select
           name: defaultOwner
           label: 默认作者
           value: admin
           validation: required
-          help: 当请求体和 Markdown Front Matter 都没有传入 author/auther 时使用。
+          action: /apis/api.console.halo.run/v1alpha1/users
+          searchable: true
+          requestOption:
+            method: GET
+            pageField: page
+            sizeField: size
+            totalField: total
+            itemsField: items
+            labelField: user.spec.displayName
+            valueField: user.metadata.name
+            descriptionField: user.metadata.name
+            fieldSelectorKey: metadata.name
+          help: 当请求体和 Markdown Front Matter 都没有传入 author/auther 时使用，只能选择 Halo 中已存在的用户。
+        - $formkit: number
+          name: reviewRetentionDays
+          label: 审核记录保留天数
+          value: 90
+          min: 1
+          validation: required|min:1
+          help: 用于清理已发布、已拒绝、发布失败的审核记录；待审核记录不会被自动清理。
         - $formkit: list
           name: defaultCategories
           label: 默认分类
@@ -70,3 +75,86 @@ spec:
             - $formkit: text
               index: "$index"
               validation: required|url
+    - group: sources
+      label: 来源管理
+      formSchema:
+        - $formkit: switch
+          name: enabled
+          label: 启用外部推送
+          value: true
+          help: 关闭后，插件会拒绝所有外部文章推送请求。
+        - $formkit: switch
+          name: astrbotPulseEnabled
+          label: 启用 Astrbot Pulse 每日推送
+          value: false
+          help: "关闭后，来源为 astrbot_plugin_pulse 的请求会被拒绝。项目地址：https://github.com/sora-yyds/astrbot_plugin_pulse"
+        - $formkit: password
+          name: astrbotPulseToken
+          label: Astrbot Pulse Token
+          value: ""
+          help: Astrbot Pulse 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
+        - $formkit: switch
+          name: astrbotPulseDefaultPublish
+          label: Astrbot Pulse 默认直接发布
+          value: false
+          help: 仅在全局默认直接发布开启时生效；来源为 astrbot_plugin_pulse 且请求未传 publish 时使用。
+        - $formkit: switch
+          name: n8nEnabled
+          label: 启用 n8n
+          value: false
+          help: 关闭后，来源为 n8n 的请求会被拒绝。
+        - $formkit: password
+          name: n8nToken
+          label: n8n 专属 Token
+          value: ""
+          help: n8n 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
+        - $formkit: switch
+          name: n8nDefaultPublish
+          label: n8n 默认直接发布
+          value: false
+          help: 仅在全局默认直接发布开启时生效；来源为 n8n 且请求未传 publish 时使用。
+        - $formkit: switch
+          name: difyEnabled
+          label: 启用 Dify
+          value: false
+          help: 关闭后，来源为 dify 的请求会被拒绝。
+        - $formkit: password
+          name: difyToken
+          label: Dify 专属 Token
+          value: ""
+          help: Dify 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
+        - $formkit: switch
+          name: difyDefaultPublish
+          label: Dify 默认直接发布
+          value: false
+          help: 仅在全局默认直接发布开启时生效；来源为 dify 且请求未传 publish 时使用。
+        - $formkit: switch
+          name: cozeEnabled
+          label: 启用 Coze
+          value: false
+          help: 关闭后，来源为 coze 的请求会被拒绝。
+        - $formkit: password
+          name: cozeToken
+          label: Coze 专属 Token
+          value: ""
+          help: Coze 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
+        - $formkit: switch
+          name: cozeDefaultPublish
+          label: Coze 默认直接发布
+          value: false
+          help: 仅在全局默认直接发布开启时生效；来源为 coze 且请求未传 publish 时使用。
+        - $formkit: switch
+          name: githubActionsEnabled
+          label: 启用 GitHub Actions
+          value: false
+          help: 关闭后，来源为 github-actions 的请求会被拒绝。
+        - $formkit: password
+          name: githubActionsToken
+          label: GitHub Actions 专属 Token
+          value: ""
+          help: GitHub Actions 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
+        - $formkit: switch
+          name: githubActionsDefaultPublish
+          label: GitHub Actions 默认直接发布
+          value: false
+          help: 仅在全局默认直接发布开启时生效；来源为 github-actions 且请求未传 publish 时使用。

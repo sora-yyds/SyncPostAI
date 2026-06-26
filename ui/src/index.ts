@@ -13,8 +13,9 @@ export default definePlugin({
         name: 'SyncPostAI',
         component: HomeView,
         meta: {
-          title: '智稿同步（SyncPostAI）',
+          title: '智稿同步',
           searchable: true,
+          permissions: ['plugin:syncpostai:review:manage'],
           menu: {
             name: '智稿同步',
             group: 'tool',

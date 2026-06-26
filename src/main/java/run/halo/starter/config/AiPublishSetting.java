@@ -8,7 +8,8 @@ public record AiPublishSetting(
     List<String> defaultCategories,
     List<String> defaultTags,
     Boolean randomCoverEnabled,
-    List<String> coverImages
+    List<String> coverImages,
+    Integer reviewRetentionDays
 ) {
 
     public static final String GROUP = "publishing";
@@ -37,8 +38,15 @@ public record AiPublishSetting(
         return coverImages == null ? List.of() : coverImages;
     }
 
+    public int reviewRetentionDaysOrDefault() {
+        if (reviewRetentionDays == null || reviewRetentionDays < 1) {
+            return 90;
+        }
+        return reviewRetentionDays;
+    }
+
     public static AiPublishSetting defaults() {
-        return new AiPublishSetting(true, "admin", List.of(), List.of(), false, List.of());
+        return new AiPublishSetting(true, "admin", List.of(), List.of(), false, List.of(), 90);
     }
 
     private static boolean hasText(String value) {
