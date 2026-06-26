@@ -1,5 +1,4 @@
-# 智稿同步（SyncPostAI）
-
+# 智稿同步
 智稿同步（SyncPostAI）是一个 Halo 2.x 插件，用于接收外部 AI、自动化脚本或第三方系统推送的文章，并在 Halo 后台完成审核、发布和审计。
 
 适用场景：
@@ -72,19 +71,20 @@ build/libs/
 
 | 来源 | `source` 值 | 平台地址 | 平台侧调用方式 | 插件侧能力 |
 | --- | --- | --- | --- | --- |
-| Astrbot Pulse | `astrbot_plugin_pulse` | <https://github.com/sora-yyds/astrbot_plugin_pulse> | Astrbot 插件配置 | 独立启用开关、专属 Token、默认发布策略 |
-| n8n | `n8n` | <https://n8n.io/> | HTTP Request 节点 | 独立启用开关、专属 Token、默认发布策略 |
-| Dify | `dify` | <https://dify.ai/> | HTTP Request 节点 | 独立启用开关、专属 Token、默认发布策略 |
-| Coze | `coze` | <https://www.coze.com/> | HTTP Request 节点 | 独立启用开关、专属 Token、默认发布策略 |
-| GitHub Actions | `github-actions` | <https://github.com/features/actions> | workflow 中使用 `curl` 或脚本请求 | 独立启用开关、专属 Token、默认发布策略 |
+| Astrbot Pulse | `astrbot_plugin_pulse` | <https://github.com/sora-yyds/astrbot_plugin_pulse> | Astrbot 插件配置 | 独立启用开关、专属密钥、默认发布策略 |
+| n8n | `n8n` | <https://n8n.io/> | HTTP Request 节点 | 独立启用开关、专属密钥、默认发布策略 |
+| Dify | `dify` | <https://dify.ai/> | HTTP Request 节点 | 独立启用开关、专属密钥、默认发布策略 |
+| Coze | `coze` | <https://www.coze.com/> | HTTP Request 节点 | 独立启用开关、专属密钥、默认发布策略 |
+| GitHub Actions | `github-actions` | <https://github.com/features/actions> | workflow 中使用 `curl` 或脚本请求 | 独立启用开关、专属密钥、默认发布策略 |
 
 来源管理规则：
 
-- 所有来源平台默认关闭，需要在插件设置中启用并填写该来源 Token 后才能接收请求。
+- 所有来源平台默认关闭，需要在插件设置中启用并选择该来源密钥后才能接收请求。
+- 来源密钥使用 Halo Secret 资源保存，密钥中必须包含名为 `token` 的字段。
 - 请求体中的 `source` 会用于匹配来源预设。
 - 来源关闭后，对应 `source` 的请求会被拒绝。
-- 请求头 `X-SyncPost-Token` 必须使用对应来源配置的 Token。
-- 未识别来源或未配置 Token 的来源会被拒绝。
+- 请求头 `X-SyncPost-Token` 必须使用对应来源密钥中 `token` 字段的值。
+- 未识别来源或未选择密钥的来源会被拒绝。
 - 全局“默认直接发布”关闭时，所有来源都会进入审核队列，即使请求传入 `publish: true` 也不会直接发布。
 - 全局“默认直接发布”开启时，请求体没有传 `publish` 的已识别来源会使用该来源的“默认直接发布”设置。
 
@@ -95,10 +95,12 @@ build/libs/
 - 接收外部请求中的文章标题、正文、摘要、作者、封面、分类、标签、发布状态和来源标识。
 - 当需要审核时，将稿件保存到 Halo 的插件数据中，等待管理员处理。
 - 管理员审核通过后，将文章、分类和标签写入当前 Halo 站点。
-- 在插件设置中保存各来源 Token、默认作者、默认分类、默认标签和封面图集配置。
+- 在插件设置中保存各来源密钥引用、默认作者、默认分类、默认标签和封面图集配置；实际 Token 保存于 Halo Secret 资源。
 - 发布成功后向请求方返回文章资源名、快照名、发布状态和文章访问地址；进入审核队列时返回审核记录名称。
 
 插件不会主动向第三方服务发送站点内容、用户数据、访问日志或推送 Token，也不包含遥测、统计、广告或远程配置功能。封面图集中的图片 URL 由站点管理员自行配置，文章页面访问这些图片时可能会由浏览器请求对应的图片服务。
+
+从旧版本升级时，如果你之前在来源配置中直接填写过 Token，需要在插件设置中为对应来源重新选择或创建 Halo Secret，并确保 Secret 中包含 `token` 字段。
 
 ## 接口地址
 

@@ -88,11 +88,13 @@ spec:
           label: 启用 Astrbot Pulse 每日推送
           value: false
           help: "关闭后，来源为 astrbot_plugin_pulse 的请求会被拒绝。项目地址：https://github.com/sora-yyds/astrbot_plugin_pulse"
-        - $formkit: password
-          name: astrbotPulseToken
-          label: Astrbot Pulse Token
-          value: ""
-          help: Astrbot Pulse 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
+        - $formkit: secret
+          name: astrbotPulseSecret
+          label: Astrbot Pulse 密钥
+          descriptionPreset: 智稿同步 Astrbot Pulse
+          requiredKeys:
+            - key: token
+              help: Astrbot Pulse 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
         - $formkit: switch
           name: astrbotPulseDefaultPublish
           label: Astrbot Pulse 默认直接发布
@@ -103,11 +105,13 @@ spec:
           label: 启用 n8n
           value: false
           help: 关闭后，来源为 n8n 的请求会被拒绝。
-        - $formkit: password
-          name: n8nToken
-          label: n8n 专属 Token
-          value: ""
-          help: n8n 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
+        - $formkit: secret
+          name: n8nSecret
+          label: n8n 专属密钥
+          descriptionPreset: 智稿同步 n8n
+          requiredKeys:
+            - key: token
+              help: n8n 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
         - $formkit: switch
           name: n8nDefaultPublish
           label: n8n 默认直接发布
@@ -118,11 +122,13 @@ spec:
           label: 启用 Dify
           value: false
           help: 关闭后，来源为 dify 的请求会被拒绝。
-        - $formkit: password
-          name: difyToken
-          label: Dify 专属 Token
-          value: ""
-          help: Dify 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
+        - $formkit: secret
+          name: difySecret
+          label: Dify 专属密钥
+          descriptionPreset: 智稿同步 Dify
+          requiredKeys:
+            - key: token
+              help: Dify 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
         - $formkit: switch
           name: difyDefaultPublish
           label: Dify 默认直接发布
@@ -133,11 +139,13 @@ spec:
           label: 启用 Coze
           value: false
           help: 关闭后，来源为 coze 的请求会被拒绝。
-        - $formkit: password
-          name: cozeToken
-          label: Coze 专属 Token
-          value: ""
-          help: Coze 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
+        - $formkit: secret
+          name: cozeSecret
+          label: Coze 专属密钥
+          descriptionPreset: 智稿同步 Coze
+          requiredKeys:
+            - key: token
+              help: Coze 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
         - $formkit: switch
           name: cozeDefaultPublish
           label: Coze 默认直接发布
@@ -148,11 +156,13 @@ spec:
           label: 启用 GitHub Actions
           value: false
           help: 关闭后，来源为 github-actions 的请求会被拒绝。
-        - $formkit: password
-          name: githubActionsToken
-          label: GitHub Actions 专属 Token
-          value: ""
-          help: GitHub Actions 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
+        - $formkit: secret
+          name: githubActionsSecret
+          label: GitHub Actions 专属密钥
+          descriptionPreset: 智稿同步 GitHub Actions
+          requiredKeys:
+            - key: token
+              help: GitHub Actions 调用时必须在 X-SyncPost-Token 请求头中携带这个值。
         - $formkit: switch
           name: githubActionsDefaultPublish
           label: GitHub Actions 默认直接发布

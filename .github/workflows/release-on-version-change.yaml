@@ -99,12 +99,28 @@ jobs:
         shell: bash
         run: |
           VERSION="${{ steps.version.outputs.version }}"
+          awk -v version="$VERSION" '
+            index($0, "## [" version "] - ") == 1 {
+              found=1
+              next
+            }
+            found && /^## \[/ {
+              exit
+            }
+            found {
+              print
+            }
+          ' CHANGELOG.md > release-notes-body.md
+          if [[ ! -s release-notes-body.md ]]; then
+            echo "CHANGELOG.md 中没有找到版本 $VERSION 的更新日志。"
+            exit 1
+          fi
           {
             echo "智稿同步（SyncPostAI） $VERSION"
             echo
-            echo "构建产物见 Assets 中的插件 JAR 文件。"
+            cat release-notes-body.md
             echo
-            echo "详细变更请查看 CHANGELOG.md。"
+            echo "构建产物见 Assets 中的插件 JAR 文件。"
           } > release-notes.md
 
       - name: Create GitHub Release

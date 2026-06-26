@@ -5,19 +5,19 @@ import org.springframework.util.StringUtils;
 public record AiSourceSetting(
     Boolean enabled,
     Boolean astrbotPulseEnabled,
-    String astrbotPulseToken,
+    String astrbotPulseSecret,
     Boolean astrbotPulseDefaultPublish,
     Boolean n8nEnabled,
-    String n8nToken,
+    String n8nSecret,
     Boolean n8nDefaultPublish,
     Boolean difyEnabled,
-    String difyToken,
+    String difySecret,
     Boolean difyDefaultPublish,
     Boolean cozeEnabled,
-    String cozeToken,
+    String cozeSecret,
     Boolean cozeDefaultPublish,
     Boolean githubActionsEnabled,
-    String githubActionsToken,
+    String githubActionsSecret,
     Boolean githubActionsDefaultPublish
 ) {
 
@@ -35,15 +35,15 @@ public record AiSourceSetting(
     public SourceProfile profile(String source) {
         return switch (normalizeSource(source)) {
             case "astrbot_plugin_pulse" -> new SourceProfile("astrbot_plugin_pulse", enabled(astrbotPulseEnabled),
-                tokenOrBlank(astrbotPulseToken), publishOrDefault(astrbotPulseDefaultPublish));
-            case "n8n" -> new SourceProfile("n8n", enabled(n8nEnabled), tokenOrBlank(n8nToken),
+                secretNameOrBlank(astrbotPulseSecret), publishOrDefault(astrbotPulseDefaultPublish));
+            case "n8n" -> new SourceProfile("n8n", enabled(n8nEnabled), secretNameOrBlank(n8nSecret),
                 publishOrDefault(n8nDefaultPublish));
-            case "dify" -> new SourceProfile("dify", enabled(difyEnabled), tokenOrBlank(difyToken),
+            case "dify" -> new SourceProfile("dify", enabled(difyEnabled), secretNameOrBlank(difySecret),
                 publishOrDefault(difyDefaultPublish));
-            case "coze" -> new SourceProfile("coze", enabled(cozeEnabled), tokenOrBlank(cozeToken),
+            case "coze" -> new SourceProfile("coze", enabled(cozeEnabled), secretNameOrBlank(cozeSecret),
                 publishOrDefault(cozeDefaultPublish));
             case "github-actions" -> new SourceProfile("github-actions", enabled(githubActionsEnabled),
-                tokenOrBlank(githubActionsToken), publishOrDefault(githubActionsDefaultPublish));
+                secretNameOrBlank(githubActionsSecret), publishOrDefault(githubActionsDefaultPublish));
             default -> SourceProfile.unknown(normalizeSource(source));
         };
     }
@@ -85,27 +85,27 @@ public record AiSourceSetting(
         return Boolean.TRUE.equals(publish);
     }
 
-    private static String tokenOrBlank(String token) {
-        return token == null ? "" : token.trim();
+    private static String secretNameOrBlank(String secretName) {
+        return secretName == null ? "" : secretName.trim();
     }
 
     public record SourceProfile(
         String key,
         boolean known,
         boolean enabled,
-        String token,
+        String secretName,
         boolean defaultPublish
     ) {
         static SourceProfile unknown(String key) {
             return new SourceProfile(key, false, false, "", false);
         }
 
-        SourceProfile(String key, boolean enabled, String token, boolean defaultPublish) {
-            this(key, true, enabled, token, defaultPublish);
+        SourceProfile(String key, boolean enabled, String secretName, boolean defaultPublish) {
+            this(key, true, enabled, secretName, defaultPublish);
         }
 
-        public boolean hasToken() {
-            return StringUtils.hasText(token);
+        public boolean hasSecret() {
+            return StringUtils.hasText(secretName);
         }
     }
 }
