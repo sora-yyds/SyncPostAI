@@ -1,23 +1,24 @@
 package run.halo.starter.config;
 
+import java.util.Map;
 import org.springframework.util.StringUtils;
 
 public record AiSourceSetting(
     Boolean enabled,
     Boolean astrbotPulseEnabled,
-    String astrbotPulseSecret,
+    Object astrbotPulseSecret,
     Boolean astrbotPulseDefaultPublish,
     Boolean n8nEnabled,
-    String n8nSecret,
+    Object n8nSecret,
     Boolean n8nDefaultPublish,
     Boolean difyEnabled,
-    String difySecret,
+    Object difySecret,
     Boolean difyDefaultPublish,
     Boolean cozeEnabled,
-    String cozeSecret,
+    Object cozeSecret,
     Boolean cozeDefaultPublish,
     Boolean githubActionsEnabled,
-    String githubActionsSecret,
+    Object githubActionsSecret,
     Boolean githubActionsDefaultPublish
 ) {
 
@@ -85,8 +86,35 @@ public record AiSourceSetting(
         return Boolean.TRUE.equals(publish);
     }
 
-    private static String secretNameOrBlank(String secretName) {
-        return secretName == null ? "" : secretName.trim();
+    @SuppressWarnings("unchecked")
+    private static String secretNameOrBlank(Object secret) {
+        if (secret == null) {
+            return "";
+        }
+        if (secret instanceof String secretName) {
+            return secretName.trim();
+        }
+        if (secret instanceof Map<?, ?> secretMap) {
+            var directName = firstTextValue(secretMap, "name", "secretName", "value");
+            if (StringUtils.hasText(directName)) {
+                return directName;
+            }
+            var metadata = secretMap.get("metadata");
+            if (metadata instanceof Map<?, ?> metadataMap) {
+                return firstTextValue((Map<Object, Object>) metadataMap, "name");
+            }
+        }
+        return "";
+    }
+
+    private static String firstTextValue(Map<?, ?> values, String... keys) {
+        for (var key : keys) {
+            var value = values.get(key);
+            if (value instanceof String text && StringUtils.hasText(text)) {
+                return text.trim();
+            }
+        }
+        return "";
     }
 
     public record SourceProfile(

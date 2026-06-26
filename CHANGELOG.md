@@ -4,7 +4,17 @@
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
-## [未发布]
+## [1.1.1] - 2026-06-26
+
+### 修复
+
+- 修复来源 Token 改为 Halo Secret 后，部分环境中已配置密钥仍提示 `Push token is not configured.` 的问题。
+- 兼容读取 Halo Secret 的 `data.token` 和 `stringData.token` 两种存储形态，避免因 Secret 写入来源不同导致 Token 校验失败。
+
+### 变更
+
+- 来源密钥配置兼容字符串、对象和带 `metadata.name` 的 Secret 引用格式，提高不同 Halo 表单返回结构下的稳定性。
+- Token 读取失败时增加不暴露密钥值的诊断日志，便于排查 Secret 名称不存在或缺少 `token` 键等配置问题。
 
 ## [1.1.0] - 2026-06-26
 

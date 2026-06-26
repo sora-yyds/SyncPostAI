@@ -1,6 +1,7 @@
 package run.halo.starter.security;
 
 import java.nio.charset.StandardCharsets;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
@@ -9,6 +10,7 @@ import run.halo.app.extension.Secret;
 import run.halo.app.plugin.ReactiveSettingFetcher;
 import run.halo.starter.config.AiSourceSetting;
 
+@Slf4j
 @Component
 public class AiPushTokenValidator {
 
@@ -57,14 +59,28 @@ public class AiPushTokenValidator {
 
     private Mono<String> tokenFromSecret(String secretName) {
         return client.fetch(Secret.class, secretName)
-            .map(secret -> {
-                if (secret.getData() == null || !secret.getData().containsKey("token")) {
-                    return "";
+            .map(this::tokenValue)
+            .doOnNext(token -> {
+                if (!StringUtils.hasText(token)) {
+                    log.warn("Source push token is empty or missing `token` key in Secret [{}].", secretName);
                 }
-                return new String(secret.getData().get("token"), StandardCharsets.UTF_8).trim();
             })
             .defaultIfEmpty("")
+            .doOnError(error -> log.warn("Failed to read source push token from Secret [{}]: {}",
+                secretName, error.getMessage()))
             .onErrorReturn("");
+    }
+
+    private String tokenValue(Secret secret) {
+        if (secret.getData() != null && secret.getData().containsKey("token")) {
+            var tokenBytes = secret.getData().get("token");
+            return tokenBytes == null ? "" : new String(tokenBytes, StandardCharsets.UTF_8).trim();
+        }
+        if (secret.getStringData() != null && secret.getStringData().containsKey("token")) {
+            var token = secret.getStringData().get("token");
+            return token == null ? "" : token.trim();
+        }
+        return "";
     }
 
     private Mono<AiSourceSetting> sourceSetting() {
