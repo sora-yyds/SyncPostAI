@@ -3,9 +3,9 @@
 apiVersion: plugin.halo.run/v1alpha1
 kind: Plugin
 metadata:
-  name: SyncPostAI
+  name: syncpostai
 spec:
-  enabled: true
+  enabled: false
   requires: ">=2.23.0"
   author:
     name: "--sora--"
@@ -16,8 +16,8 @@ spec:
   homepage: https://github.com/sora-yyds/SyncPostAI#readme
   repo: https://github.com/sora-yyds/SyncPostAI/
   issues: https://github.com/sora-yyds/SyncPostAI/issues
-  displayName: "智稿同步（SyncPostAI）"
-  description: "面向 Halo 的外部文章推送插件，支持 AI 系统、自动化脚本和第三方服务通过 Token 鉴权发布 Markdown、HTML 或文本文章。"
+  displayName: "智稿同步"
+  description: "面向 Halo 的 AI 内容接收、审核与发布插件，支持自动化脚本和第三方服务通过 Token 鉴权提交 Markdown、HTML 或文本稿件。"
   license:
     - name: "GPL-3.0"
       url: "https://github.com/sora-yyds/SyncPostAI/blob/main/LICENSE"

@@ -1,0 +1,15 @@
+apiVersion: v1alpha1
+kind: Role
+metadata:
+  name: syncpostai-role-manage-reviews
+  labels:
+    halo.run/role-template: "true"
+  annotations:
+    rbac.authorization.halo.run/module: "智稿同步"
+    rbac.authorization.halo.run/display-name: "管理审核稿件"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:syncpostai:review:manage"]
+rules:
+  - apiGroups: ["console.api.syncpostai.sora.run"]
+    resources: ["article-reviews", "article-reviews/approve", "article-reviews/reject", "article-reviews/cleanup"]
+    verbs: ["*"]

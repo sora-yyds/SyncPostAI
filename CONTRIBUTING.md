@@ -106,6 +106,9 @@ ui/src/
 
 ```text
 type: description
+
+- 详细说明 1
+- 详细说明 2
 ```
 
 ### type 类型
@@ -124,18 +127,49 @@ type: description
 
 ### description 描述
 
-`description` 是本次提交的简短描述：
+`description` 是本次提交的简短描述，作为提交信息第一行：
 
 - 尽量不超过 50 个字符。
-- 使用清晰、直接的中文或英文。
+- 使用清晰、直接的中文。
 - 描述本次提交做了什么，而不是描述过程。
+
+### 详细描述
+
+如果本次提交包含多处改动，建议在第一行之后空一行，并使用 Markdown 分点说明：
+
+- 每一项使用 `-` 开头。
+- 说明具体改动内容、影响范围或兼容性变化。
+- 不要写入 Token、账号、服务器地址等敏感信息。
+- 如果提交已验证，可以补充构建或测试结果。
 
 ### 示例
 
 ```text
 add: 支持随机封面图集
+
+- 新增封面图集配置项
+- 当文章没有传入封面时，随机选择一张图片作为封面
+- 已通过 .\gradlew.bat build 验证
+```
+
+```text
 fix: 修复 Markdown Front Matter 分类解析
+
+- 兼容 YAML 列表形式的 categories 和 tags
+- 修复分类为空时使用默认分类的逻辑
+```
+
+```text
 update: 更新 README 调用示例
+
+- 补充 PowerShell、Node.js、Python 调用示例
+- 将示例接口路径更新为当前公开推送接口
+- 增加 Windows PowerShell 下 UTF-8 JSON 文件发送说明
+```
+
+简短提交也可以只写一行：
+
+```text
 style: 格式化控制台页面样式
 test: 增加文章推送服务测试
 build: 升级 Halo 插件构建配置
