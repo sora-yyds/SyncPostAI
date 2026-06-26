@@ -4,16 +4,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 import run.halo.app.plugin.ReactiveSettingFetcher;
-import run.halo.starter.config.AiSecuritySetting;
+import run.halo.starter.config.AiSourceSetting;
 
 @Component
 public class AiPushTokenValidator {
 
     public static final String TOKEN_HEADER = "X-SyncPost-Token";
-
-    private static final String TOKEN_PROPERTY = "syncpostai.push-token";
-
-    private static final String TOKEN_ENV = "SYNCPOSTAI_PUSH_TOKEN";
 
     private final ReactiveSettingFetcher settingFetcher;
 
@@ -22,37 +18,36 @@ public class AiPushTokenValidator {
     }
 
     public Mono<Boolean> isEnabled() {
-        return securitySetting()
-            .map(AiSecuritySetting::enabledOrDefault);
+        return sourceSetting()
+            .map(AiSourceSetting::enabledOrDefault);
     }
 
-    public Mono<Boolean> isConfigured() {
-        return configuredToken()
+    public Mono<Boolean> isConfigured(String source) {
+        return configuredToken(source)
             .map(StringUtils::hasText);
     }
 
-    public Mono<Boolean> isValid(String token) {
-        return configuredToken()
+    public Mono<Boolean> isSourceEnabled(String source) {
+        return sourceSetting()
+            .map(setting -> setting.profile(source))
+            .map(profile -> profile.known() && profile.enabled());
+    }
+
+    public Mono<Boolean> isValid(String token, String source) {
+        return configuredToken(source)
             .map(expectedToken -> StringUtils.hasText(expectedToken) && expectedToken.equals(token));
     }
 
-    private Mono<String> configuredToken() {
-        return securitySetting()
-            .map(AiSecuritySetting::tokenOrBlank)
-            .map(settingToken -> StringUtils.hasText(settingToken) ? settingToken : environmentToken());
+    private Mono<String> configuredToken(String source) {
+        return sourceSetting()
+            .map(setting -> setting.profile(source))
+            .map(profile -> profile.known() && profile.enabled() ? profile.token() : "");
     }
 
-    private Mono<AiSecuritySetting> securitySetting() {
-        return settingFetcher.fetch(AiSecuritySetting.GROUP, AiSecuritySetting.class)
-            .defaultIfEmpty(AiSecuritySetting.defaults())
-            .onErrorReturn(AiSecuritySetting.defaults());
+    private Mono<AiSourceSetting> sourceSetting() {
+        return settingFetcher.fetch(AiSourceSetting.GROUP, AiSourceSetting.class)
+            .defaultIfEmpty(AiSourceSetting.defaults())
+            .onErrorReturn(AiSourceSetting.defaults());
     }
 
-    private String environmentToken() {
-        var propertyToken = System.getProperty(TOKEN_PROPERTY);
-        if (StringUtils.hasText(propertyToken)) {
-            return propertyToken;
-        }
-        return System.getenv(TOKEN_ENV);
-    }
 }

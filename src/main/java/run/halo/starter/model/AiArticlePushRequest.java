@@ -12,6 +12,7 @@ public record AiArticlePushRequest(
     String slug,
     List<String> tags,
     List<String> categories,
-    Boolean publish
+    Boolean publish,
+    String source
 ) {
 }

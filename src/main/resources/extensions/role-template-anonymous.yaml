@@ -7,7 +7,7 @@ metadata:
     halo.run/hidden: "true"
     rbac.authorization.halo.run/aggregate-to-anonymous: "true"
   annotations:
-    rbac.authorization.halo.run/module: "智稿同步（SyncPostAI）"
+    rbac.authorization.halo.run/module: "智稿同步"
     rbac.authorization.halo.run/display-name: "推送 AI 文章"
 rules:
   - apiGroups: ["api.syncpostai.sora.run"]
