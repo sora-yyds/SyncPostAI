@@ -10,7 +10,7 @@ spec:
   author:
     name: "--sora--"
     website: https://s-o-r-a.top/
-  logo: syncpostai-logo.png
+  logo: https://raw.githubusercontent.com/sora-yyds/SyncPostAI/main/src/main/resources/syncpostai-logo.png
   settingName: syncpostai-settings
   configMapName: syncpostai-configmap
   homepage: https://github.com/sora-yyds/SyncPostAI#readme

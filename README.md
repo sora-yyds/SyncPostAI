@@ -26,9 +26,9 @@
 
 ## 界面截图
 
-![来源管理设置](assets/screenshots/source-settings.png)
+![来源管理设置](https://raw.githubusercontent.com/sora-yyds/SyncPostAI/main/assets/screenshots/source-settings.png)
 
-![待审核工作台](assets/screenshots/review-workbench.png)
+![待审核工作台](https://raw.githubusercontent.com/sora-yyds/SyncPostAI/main/assets/screenshots/review-workbench.png)
 
 ## 安装
 
